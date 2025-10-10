@@ -28,3 +28,9 @@ results = [simulate() for _ in range(N)]
 
 p_red = results.count('r') / N
 print(f"Estimated probability of red: {p_red:.4f}")
+
+theoretical_p_red = (3/10) * (1/2) + (4/10) * (1/6) + (2/10) * (1/3)
+print(f"Theoretical probability of red: {theoretical_p_red:.4f}")
+
+difference = abs(p_red - theoretical_p_red)
+print(f"Difference: {difference:.4f}")
