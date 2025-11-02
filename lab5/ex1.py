@@ -258,3 +258,66 @@ print(f'Full HMM model graph saved to: {out_path_full_hmm}')
 plt.show()
 plt.close()
 
+
+# --- BONUS: Manual Viterbi Algorithm Implementation ---
+print("\n--- Bonus: Manual Viterbi Implementation ---")
+
+def viterbi_manual(obs, states, start_p, trans_p, emit_p):
+   
+    N = len(states)
+    T = len(obs)
+
+    log_start_p = np.log(start_p + 1e-15)
+    log_trans_p = np.log(trans_p + 1e-15)
+    log_emit_p = np.log(emit_p + 1e-15)
+
+    T1 = np.zeros((N, T))       
+    T2 = np.zeros((N, T), dtype=int)  
+
+    for i in states:
+        T1[i, 0] = log_start_p[i] + log_emit_p[i, obs[0]]
+        T2[i, 0] = -1 
+
+    for t in range(1, T):
+        for j in states:
+            prev_probs = T1[:, t-1] + log_trans_p[:, j]
+            T2[j, t] = np.argmax(prev_probs)
+            T1[j, t] = prev_probs[T2[j, t]] + log_emit_p[j, obs[t]]
+
+    best_last_state = np.argmax(T1[:, T-1])
+    best_path_log_prob = T1[best_last_state, T-1]
+
+    path = np.zeros(T, dtype=int)
+    path[T-1] = best_last_state
+    for t in range(T-2, -1, -1):
+        path[t] = T2[path[t+1], t+1]
+
+    return path, best_path_log_prob
+
+manual_path_indices, manual_log_prob = viterbi_manual(
+    obs=obs_sequence,
+    states=[0, 1, 2],
+    start_p=start_prob,
+    trans_p=trans_matrix,
+    emit_p=emission_matrix
+)
+
+manual_path_names = [states[i] for i in manual_path_indices]
+
+print(f"Manual Viterbi Path:\n{manual_path_names}")
+print(f"Manual Viterbi Log-Prob: {manual_log_prob:.3f}")
+ 
+ #aici verificam daca rezultatele coincid
+print("\n verificare") 
+if np.all(hidden_state_indices == manual_path_indices):
+    print("Manual Viterbi matches hmmlearn.decode() result!")
+else:
+    print(" Paths differ (possible due to equal-probability ties).")
+    print("hmmlearn path:", hidden_state_names)
+    print("manual path  :", manual_path_names)
+
+if np.isclose(log_prob_viterbi, manual_log_prob):
+    print(" Log-probabilities match.")
+else:
+    print(" Log-probabilities differ:", log_prob_viterbi, manual_log_prob)
+
