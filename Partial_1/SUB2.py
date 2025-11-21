@@ -54,3 +54,11 @@ print(f"Log-Probability P(O | lambda): {log_prob_obs:.3f}")
 print(f"Probability P(O | lambda): {prob_obs:.4e}")
 
 
+log_prob_viterbi, hidden_state_indices = model.decode(obs_sequence_counts)
+prob_viterbi = np.exp(log_prob_viterbi)
+
+hidden_state_names = [activity_states[i] for i in hidden_state_indices]
+
+print(f"Most Probable Hidden Sequence:\n{hidden_state_names}")
+print(f"Log-Probability of this path: {log_prob_viterbi:.3f}")
+print(f"Probability of this path: {prob_viterbi:.4e}")
